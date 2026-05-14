@@ -37,3 +37,19 @@ LLMs can complete text based tasks like answering questions or writing a short s
 #### What can't a LLM do?
 
 Because of pretraining LLMs can't be reliably correct so they can't always be used as a source of information. They are also unable to have emotions as they don't actually think like a human this also mean that they can struggle with tasks that use human common sense. They also can't help with task that it has not be trained for as it is pretrained.
+
+---
+
+### Week 2: How a neural network represents knowledge
+
+I watched ["But what is a neural network?"](https://youtu.be/aircAruvnKk?si=Ua-yuvyIjy_TXIwX) by 3blue1brown, I learned:
+
+Neural networks are made of layers including an input, an output layer and hidden layers in between.
+
+Each layer is made up of neurons that have a bias and an activation. The activation is determined by the activation of all the neurons of the previous layer.
+
+The connection between each neuron have a weight. An activation is determined by the wighted sum (the wights being the wights of the connection) added to the bias, then put into a function(e.g. sigmoid) that results in a value between 0 and 1.
+
+<img src="images/neural_network.png" alt="neural network" width="350" height="269">
+
+I also used the [TensorFlow Playground](https://playground.tensorflow.org) to get an idea of the effect of the weight, how many layers there are, how may neuron are on each layer and other parameters, on how effective the neural network is.

@@ -53,3 +53,24 @@ The connection between each neuron have a weight. An activation is determined by
 <img src="images/neural_network.png" alt="neural network" width="350" height="269">
 
 I also used the [TensorFlow Playground](https://playground.tensorflow.org) to get an idea of the effect of the weight, how many layers there are, how may neuron are on each layer and other parameters, on how effective the neural network is.
+
+---
+
+### Week 3: Gradient descent — the engine of learning
+
+I watched  [Gradient descent, how neural networks learn](https://youtu.be/IHZwWFHWa-w?si=enMc157WJJ2l6_zv) by 3blue1brown, I learned:
+
+To determine how bad the computer did the cost function is used.
+
+This is determined by subtracting the expected activation from the actual activation, then squaring it (so that bigger errors have greater effect and so that signe don't have an effect) for each neuron on the output layer.
+
+Then adding them up to get a single score (the lower, the better it did) can be written as 𝛴(a-e)^2.
+
+The cost function uses lots of training data (a sample input and the expected output for that input) the cost is calculated for all the training data.
+
+For a neural network to improve it needs to know how to improve not just how it did.
+
+This is done using gradient descent, a process were it finds the local gradient and uses it to "move down hill" (reducing the cost) this means it will find the local minimum, but this may not be the best option. It will likely not change much from this local minimum as the adjustments will be too small so it will move one way, and then it will want to move back.
+
+Due to it taking every weight and bias as an input there are many local minimums (each weight and bias add their own dimension to graph that the gradient is from making it more complex) so it will often not be optimal.
+

@@ -74,3 +74,103 @@ This is done using gradient descent, a process were it finds the local gradient 
 
 Due to it taking every weight and bias as an input there are many local minimums (each weight and bias add their own dimension to graph that the gradient is from making it more complex) so it will often not be optimal.
 
+---
+
+### week 4/5 Backpropagation
+
+I watched  [Backpropagation, intuitively](https://youtu.be/Ilg3gGewQ5U?si=HJbLsZmiyPSro92K) by 3blue1brown, I learned:
+
+Backpropagation is the process of finding what change would decrease the cost for a specific neurone in the output layer across multiple tests (theoretically all examples should be used but it’s more effective to use random groups).
+
+Then the same thing happens for all other neurones in the output layer.
+
+Neurones that have a greater difference from expected output have a greater influence.
+
+This is then repeated with the second to last layer going back until it has gone to the input layer.
+
+The weight and bias are changed in a way to reduce the cost.
+
+Backpropagation finds the gradient that is used in gradient descent and that determines the change that should be made to reduce the cost
+
+Within the gradient the larger a vale the grater the influence of that change on the cost (the sign(+/-) doesn’t matter in this case but it is used to determine what change is made)
+
+A weight is more influential if the activation of the related neurone is greater and the activation of a neurone has more influence when the weight is greater(because each depends on the other in the chain rule.)
+
+Each training example suggests to change each weight and bias differently, so for each weight and bias you average then sum the change that each training example wishes to make for the weight or bias. This gives the gradient of the cost function.
+
+It would take a long time for a computer to calculate the gradient using every training example. 
+
+So randomise the list then split the list into groups usual in the hundreds, then it uses that to make a change then use the next list.
+
+This means that it will not go as directly towards the local minimum but it will be much faster than using all the data each time. This is called stochastic gradient descent.
+
+I also watched  [Backpropagation calculus](https://youtu.be/tIeHLnjs5U8?si=D1Rq2DKIROrE8rOE) by 3blue1brown, I learned:
+
+You want to find the change in the cost divided by the  change in a weight (to find how big of an effect it has and if it should be increased or decressed). This can be written as  ∂C/∂w with w representing any weight and C representing the cost in this training example.
+
+All the equations mentioned are chain rule expressions and their derivatives. These are used to find how much of an influence a change will have on the cost.
+
+For the flowing exaple the assumption is that this neural network or the relative section only has one neurone per layer
+
+For this example the weighted sum would be w x a(L-1) + b
+
+This can be shown as:<br/>
+∂C/ ∂w=( ∂z/ ∂w)x( ∂a/ ∂z)x( ∂C/ ∂a)
+
+Where:<br/>
+C=cost for this training example<br/>
+w= weight <br/>
+z= result of the weighted sum + bias<br/>
+a= activation of the neurone<br/>
+∂= delta (change in)<br/>
+y= expected result<br/>
+b= bias<br/>
+(L-1) means that it is referring to the respective thing on the previous layer
+
+∂C / ∂a=2(a-y) (this is specifically the derivative of mean squared error. cost function)
+
+∂a / ∂z=σ’(z) (this is specifically for the sigmoid function)
+
+∂z / Δ∂=a(L-1)<br/>
+This means that the effect of the weight is effected by the activation to the neurone it is coming from (a(L-1)).
+
+This means that  ∂C / ∂w = 2(a-y)σ’(z)a(L-1)
+
+The actual cost would be the average across many training examples.
+
+The equation for the bias is the same but the ∂w is replaced with  ∂b.
+
+So the equation becomes:<br/>
+ ∂C/ ∂b=( ∂z/ ∂b)x( ∂a/ ∂z)x( ∂C/ ∂a)
+
+And<br/>
+∂z/ ∂b=1
+
+So<br/>
+∂C / ∂b=1x2(a-y)σ’(z)=<br/>
+∂C / ∂b=2(a-y)σ’(z)
+
+The equation for the effect of the previous activation is the same but ∂w or ∂b becomes ∂a(L-1)
+
+So the equation becomes<br/>
+∂C/ ∂a(L-1)=( ∂z/ ∂a(L-1))x( ∂a/ ∂z)x( ∂C/ ∂a)
+
+And<br/>
+∂z/ ∂a(L-1)=w
+
+So<br/>
+∂C/ ∂a(L-1)=w2(a-y)σ’(z)
+
+
+When the neural network has multiple neurones per layer, a subscript is added to determine what neurone or weight is being referred to.
+
+The weighted sum would be more complex for this example as there are more weights and activations. 
+
+The equation for a specific connection between neurones will be the same, but with a subscript for every value, bar the cost, to show what it is referring to.
+
+But the equation does change for the activation of a neurone on the layer (L-1)<br/>
+The equation would become (the sub scripts are not included):<br/>
+∂C/ ∂a(L-1)=Σ( ∂z/ ∂a(L-1))x( ∂a/ ∂z)x( ∂C/ ∂a)
+
+Σ is the sum of j from 0 to n(L-1) which means it is the sum of its effect for each individual neurone of the previous  layer.
+

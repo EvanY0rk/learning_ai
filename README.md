@@ -186,14 +186,41 @@ the program and a read me is in the [micrograd](micrograd) file.
 
 ---
 
-### week 9-12 makemore
+### week 9-13 makemore
 
-i watched the fist three part of makemore by andrej karpathy: [part1](https://youtu.be/PaCmpygFfXo?si=MAl2v7GycG8UnXps), [part2](https://youtu.be/TCH_1BHY58I?si=J4cgu8_aTS3Zht7q), [part3](https://youtu.be/P6sfmUTpUmc?si=MStETvCviYWd7YsM)
+I watched the fist three part of makemore by andrej karpathy: [part1](https://youtu.be/PaCmpygFfXo?si=MAl2v7GycG8UnXps), [part2](https://youtu.be/TCH_1BHY58I?si=J4cgu8_aTS3Zht7q), [part3](https://youtu.be/P6sfmUTpUmc?si=MStETvCviYWd7YsM).
 
-while watching the video i also wrote the program at the same time (like with micrograd)
+While watching the video i also wrote the program at the same time (like with micrograd).
 
-the program the a read me is in the [makemore](makemore) file.
+The program the a read me is in the [makemore](makemore) file.
 
+### week 14 attention:
 
+I watched [attention in transformers, step by step | deep learning chapter 6](https://youtu.be/eMlx5fFNoYc?si=jH99JJIsVp-EmQhd) by 3blue1brown, I also read the first half of Jay Alammar’s [The Illustrated Transformer](https://jalammar.github.io/illustrated-transformer/) post I learned:
 
+The data that is being used is split into tokens so for example with text it would be split into words or smaller pieces of the text every token is embedded in a multidimensional vector that is hundreds of dimensions (that also contain the information about its position as well as the token itself).
+
+The attention block allows the module to transfer information encoded in one embedding (of a token) to another this means that it can refine the meaning of a token by taking in the context.
+
+This means that across the whole network all the information to predict the next word is in the last embedding so through all the attention blocks it now encodes information from the whole text instead of the one word it started as (this embedding is then multiplied by an unembedding matrix to give a probability for the next word).
+
+Each word will make a query which is another vector (it is much smaller than the embedding vector) that encodes the word asking previous words if they contain relevant information, that changes the meaning of the word making the query.
+The query vector is found by multiplying the embedding vector by a certain matrix (learned through training). This is done with every embedding vector to get a query vector for all of them.
+
+The same process is done with a different matrix (the key matrix) to make a key vector for every token the key vector is like an answer to the query vector.
+A key vector matches a query vector if they closely align to each other. to find how closely aligned they are, a dot product is found  (this is then often divided by the square root of the dimension of the key/query space to stop the products growing large in magnitude as dimensionality increases, pushing softmax into regions with extremely small gradients) for every key, query pair (if it is a large positive number, then they closely align to each other).
+For every query vector every dot product it has with a key needs to be between 0 and 1 and they need to add to 1 so a soft max is used.
+Outcome from the softmax acts as a weight for how relevant the word that made the key is to the word that made the query.
+
+When training you can get multiple training examples from one text as you can predict the last token and the second to last and the third to last and so on but if future tokens affect previous ones it will give away the answer.
+To fix this you can set every value that represents a token affecting an earlier one produced by the soft max to be forced to be 0 to do this before applying the soft max all those values are set to negative infinity so they will always become 0, and it would still be normalised (every value for a query adding to 1), this is not always used.
+This is called masking
+
+The most straightforward  way to  encode the information from a token to another token is by multiplying by another matrix (the value matrix, which is often actually two matrices that are multiplied by each other to give the value matrix so there are fewer parameters compared to then if it was one matrix) by the embedding of the first word to get a value vector, then adding this to the embedding of the second word when this is done the vector is multiplied by the relevant output from the softmax function, which acts as a weight then all the value vectors produced by this are added to the original embedding of the token that made the relevant query vector (meaning the information is accumulated across the whole network), this is done for every embedding, this is called one head of attention.
+
+This combined can be written as: softmax((q x k)/√dk) x v
+
+This is for self attention but if it is used for cross attention (for modules that process two types of data like text in one language and text in another or audio and a transcription) it would be mostly the same but the query and key would be from different data sets, it is also a case where the values from the softmax will not be forced to be 0 if they affect previous tokens.
+
+There will often be many attention heads (e.g.GPT-3 has 96) and every one has its own query, key and value matrix when it is used in between every attention layer there will be a multi-layer perceptron (that processes each token's embedding independently, and is where the model stores learned facts/patterns) as well and inbetween every MLP and attention layer there is also a normalisation layer to make a full Transformer.
 

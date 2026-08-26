@@ -274,7 +274,7 @@ X = torch.tensor(X)
 Y = torch.tensor(Y)
 ```
 
-Due to looking at the last 3 characters the symbol `.` is treated as if there were multiple before the name (and one at the end like before) so that there are three characters before the first letter.
+The context length is 3 there for it is padded with `.` before the first character
 This would make the first name become:
 ```
 ... ---> e
@@ -284,16 +284,16 @@ emm ---> a
 mma ---> .
 ```
 
-embedding are created in a 27 by 2 (row table for every character) these are initialised randomly at first but the value can be changed through training.
+Embeddings are created in a 27 by 2 (row table for every character) these are initialised randomly at first but the value will be changed through training.
 ```python
 C = torch.randn((27, 2))
 emb = C[X]
 ```
 
-In X every row one of the three characters that came before the letter is represented as an integer.
+In X for every row, all of the characters in the context length are represented as an integer.
 This means that X has a shape of `[228146, 3]` so there are 228146 examples.
 By indexing C with X every character of X maps to a two column vector (row) of C.
-`emb` becomes a table of characters embeddings for every example in the data, with the shape `[228146, 3, 2]`.
+`emb` becomes a table of character embeddings for every example in the data, with the shape `[228146, 3, 2]`.
 
 Despite being a different process it does the same as the one hot encoding used in part 1 of makemore.
 ```python
@@ -301,7 +301,7 @@ Despite being a different process it does the same as the one hot encoding used 
   logits = xenc @ W # predict log-counts
 ```
 
-The embeddings emb are a lookup table identical to `xenc @ W` seen in lecture 2, but more efficient.
+The embeddings `emb` are a lookup table identical to `xenc @ W` seen in lecture 2, but more efficient.
 For every value in X the table indexes its embedding.
 
 In the neural network the hidden layer has its weights and biases initialised randomly, there are 6 inputs as there are the three characters and each character is mapped to two vectors.
@@ -338,7 +338,7 @@ This makes both the forward and backward pass more efficient and the operation i
 
 For large values of logits `logits.exp()` will overflow so it outputs `inf` (infinity), the `inf` will be divided by `inf` which returns `nan` and destroys the loss.
 
-`logits.exp()` subtracts the largest value from all values so the largest becomes `0` and  all others become negative numbers.
+` F.cross_entropy()` handles this by subtracts the largest value from all values so the largest becomes `0` and  all others become negative numbers.
 Large negative numbers will become `0` not `inf` which can't destroy the loss.
 
 If a network is too large, it can learn the training data not the patterns in it.
@@ -347,7 +347,7 @@ This means that it will perform well on the training data but bad on anything el
 If a network is too simple it can't learn the patterns.
 This means that it will perform badly, this is called underfitting.
 
-There are many optimisations for a network, which can be split into three phases: training, development, and testing.
+There are many optimisations for a network, to identify these creating the module can be split into three phases: training, development, and testing.
 
 The data is normally split 80% training, 10% development and 10% testing.
 
@@ -460,7 +460,7 @@ The training and dev datasets have similar loss so it may be underfitting.
 
 You would want to adjust hyperparameters (number of layers, batch size, learning rate, the size of the embeddings etc) to make it more optimised.
 
-For this increasing the dimension embedding from 2 to 10 seemed to help and increasing the number of hidden layers did very little.
+For this, increasing the dimension of the embeddings from 2 to 10 seemed to help and increasing the number of hidden layers did very little.
 
 When the dev and training set loss starts to diverge, this means that the network is starting to overfit so the test data should be used to evaluate the model.
 
@@ -478,7 +478,7 @@ plt.grid('minor')
 
 In the embedding table you can see how the network works, as similar characters are close together, like the vowels, as they are fairly interchangeable, and some are more isolated, like `q`, `.` and `j`
 
-Now sample can be taken from the neural network:
+Now samples can be taken from the neural network:
 ```python
 # sample from the model
 g = torch.Generator().manual_seed(2147483647 + 10)
@@ -535,27 +535,28 @@ At initialisation the loss is `27.8817` but if there was an even distribution ov
 To make the initialisation better the value for the weight and logits need to be less extreme.
 The first change to improve this is by multiplying `b2` by `0`.
 
-The other change is to reduce `W2` by multiplying it by say `0.01` it can be any small number. 
+The other change is to reduce `W2` by multiplying it by, say `0.01`, it can be any small number. 
 Although it could be set to 0 which would make it so the loss starts at the expected value,
 but if 0 is used it can lead to the network always having every neuron in that layer be the same.
 
 By making the values less extreme at initialisation, the first iterations are not just spent reducing the values,
-So more iterations are spent actually improving the network so in the same number of iterations you can have a better network.
+so more iterations are spent actually improving the network so in the same number of iterations you can have a better network.
 
 
-Another issue at initialisation is that the value of h will often by `1` or `-1` due to how the tanh function works, most values become `1` or `-1`,
-this means that the gradient is killed in the backward pass when going though tanh if this happens for every example in the training set, it becomes a dead neuron, as it will not change.
+Another issue at initialisation is that the value of `h` will often be `1` or `-1` due to how the tanh function works.
+As most values become `1` or `-1`, the gradient is killed in the backward pass when going though tanh.
+If this happens for every example in the training set, it becomes a dead neuron, as it will not change.
 
-To fix this the value that are passed into the tanh need to be reduced the values passed into the tanh are calculated as `embcat @ W1 + b1`,
-so by reducing the weight and bias it will improve, so `b1` is multiplied by `0.01` and `W1` is multiplied by `(5/3) /  ((n_embd * block_size)**0.5)` (the equation is as such that the tandard deviation will start at one after multiplying by `W1`)
+To fix this the values that are passed into the tanh need to be reduced.
+The values passed into the tanh are calculated as `embcat @ W1 + b1`, so by reducing the weight and bias it will improve, so `b1` is multiplied by `0.01` and `W1` is multiplied by `(5/3) /  ((n_embd * block_size)**0.5)`. The equation is as such that the standard deviation will start at one after multiplying by `W1`.
 
 For this network these did not make too big of a difference but on a deeper network it may result in there being no changes at all made to the network if the initialisation is bad enough.
 
 
-
 Another important optimisation is adding batch normalisation.
 
-The values that are passed into tanh you want to be Gaussian  (following a standard distribution) batch normalisation just makes the input to the tanh Gaussian.
+The values that are passed into tanh you want to be Gaussian  (following a standard distribution).
+Batch normalisation just makes the input to the tanh Gaussian.
 This is done by subtracting the mean of `hpreact` (which is passed into tanh) then dividing it by the standard deviation of `hpreact` this can be done with this:
 ```python
 bnmeani = hpreact.mean(0, keepdim=True)
@@ -567,18 +568,22 @@ with torch.no_grad():
 ```
 There are additional variables used to allow the network to adjust the batch normalisation, as it only needs to be Gaussian at initialisation.
 
-This fixes the tanh-saturation problem as the value will mostly be small so that they don't end up mostly being `1` or `-1`.
+This fixes the tanh-saturation problem, as the values will mostly be small so that they don't end up being `1` or `-1`.
 
 This also makes `b1` useless so it is removed.
 
-At the moment it is not too important as there is only one hidden layer but with a bigger network batch normalisation will have a big effect.
+At the moment it is not too important as, there is only one hidden layer, but with a bigger network batch normalisation will have a big effect.
 
-batch normalisation has a some issues that would make it undesirable but it is so effective at stabilising training that it's still used in most modern deep networks.
+Batch normalisation has a some issues that would make it undesirable but it is so effective at stabilising training that it's still used in most modern deep networks.
 There are other normalisation techniques (e.g. Layer Normalisation, Group Normalisation, and Instance Normalisation) that are meant to prevent the issues with batch normalisation.
 
-The second part of the code is mostly functionally the same as the first apart from some  changes for example it has more layers but it is also programmed 
-differently.
-It is programmed to make it less reliant on specific values for example the equation for initialisation of the weight  `0.2` can be used instead of `5/3`and it doesn't have that big of an effect but that would have a substantial effect on the first section.
-It also doesn't make it use less of PyTorch and instead does the same thing that PyTorch would do but it is written out manually,(this is done to give a better understanding of how it works it don't make the program better, they end with the losses and the gradients being very similar).
-the code is also split into reusable classes (e.g. Linear, BatchNorm1d, Tanh) these are alike to PyTorch's own `nn.Module` API.
-It also makes use of analytical graphs (these is an update-to-data ratio plot and two graphs show gradient distribution and activation distribution these are similar to what was used to identify tanh-saturation problem earlier), to see how the network is performing.
+The second part of the code is functionally the same as the first, apart from some changes.
+For example it has more layers, but it is also programmed differently.
+It is programmed to make it less reliant on specific values, for example the equation for initialisation of the weight  `0.2` can be used instead of `5/3`, and it doesn't have that big of an effect, but that would have a substantial effect on the first section.
+
+It also use less PyTorch and instead does the same thing that PyTorch would do but it is written out manually.
+This is done to give a better understanding of how it works,. it doesn't inprove the program.
+In end  the losses and the gradients are being very similar for both.
+
+The code is also split into reusable classes (e.g. Linear, BatchNorm1d, Tanh) these are alike to PyTorch's own `nn.Module` API.
+It also makes use of analytical graphs (these are an update-to-data ratio plot and two graphs show gradient distribution and activation distribution. These are similar to what was used to identify tanh-saturation problem earlier) to see how the network is performing.

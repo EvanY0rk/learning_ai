@@ -241,3 +241,8 @@ This is for self attention but if it is used for cross attention (for modules th
 There will often be many attention heads (e.g.GPT-3 has 96) and every one has its own query, key and value matrix when it is used.
 In between every attention layer there will be a multi-layer perceptron (that processes each token's embedding independently, and is where the model stores learned facts/patterns) as well and inbetween every MLP and attention layer there is also a normalisation layer to make a full Transformer.
 
+---
+### week 15 translator:
+
+built a command line based application Written in python that translates text between languages using a clude API,
+this is in [translator](translator)

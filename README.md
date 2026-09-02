@@ -244,5 +244,5 @@ In between every attention layer there will be a multi-layer perceptron (that pr
 ---
 ### week 15 translator:
 
-built a command line based application Written in python that translates text between languages using a clude API,
-this is in [translator](translator)
+Built a command line based application written in Python that translates text between languages using a Clude API,
+This is in [translator](translator).
